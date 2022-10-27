@@ -8,6 +8,15 @@ Bugly style update modal on flutter. It is based on UI and cross platform.
 
 Example project is at `example/`.
 
+### Install
+
+Add dependency to `pubspec.yaml`.
+
+```yaml
+dependencies:
+  update_modal: ^0.0.1
+```
+
 ### Implement your upgrade checker and downloader
 
 ```dart
