@@ -1,7 +1,7 @@
 name: update_modal
-description: A new Flutter package project.
+description: Bugly style update modal on flutter
 version: 0.0.1
-homepage: file:///dev/null
+homepage: https://github.com/luo3house/flutter_update_modal
 
 environment:
   sdk: '>=2.18.0 <3.0.0'

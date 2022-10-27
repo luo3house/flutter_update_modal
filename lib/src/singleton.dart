@@ -1,12 +1,15 @@
-import 'package:example/content.dart';
-import 'package:example/service.dart';
 import 'package:flutter/material.dart';
+import 'content.dart';
+import 'service.dart';
+import 'strings.dart';
 
 class UpdateModal {
   UpdateModal._();
   static void init(
     BuildContext context, {
-    required UpdateModalWithCheckerService service,
+    required UpdateModalService service,
+    UpdateModalContentStyle? style,
+    UpdateModalStrings? strings,
   }) {
     dynamic Function() onDismiss = () {};
     final wrappedService = SimpleUpdateModalService()
@@ -20,15 +23,20 @@ class UpdateModal {
           });
     wrappedService.checkUpdate().then((info) {
       if (info == null) return;
-      showDialog(
+      final defaultStyle = UpdateModalContentStyle.defaultStyle;
+      final content = UpdateModalContent(
+        service: wrappedService,
+        info: info,
+        style: style,
+        strings: strings,
+      );
+      showGeneralDialog(
         context: context,
         barrierDismissible: false,
-        builder: (BuildContext ctx) {
-          onDismiss = () => Navigator.of(ctx).pop();
-          return AlertDialog(
-            contentPadding: EdgeInsets.zero,
-            content: UpdaterModalContent(service: wrappedService, info: info),
-          );
+        barrierColor: content.style?.maskColor ?? defaultStyle.maskColor!,
+        pageBuilder: (x, y, z) {
+          onDismiss = () => Navigator.of(x).pop();
+          return Center(child: Material(child: content));
         },
       );
     });

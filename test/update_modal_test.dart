@@ -1,12 +1,31 @@
-// import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:update_modal/src/utils.dart';
 
-// import 'package:update_modal/update_modal.dart';
+Future sleep(int ms) => Future.delayed(Duration(milliseconds: ms));
 
 void main() {
-  // test('adds one to input values', () {
-  //   final calculator = Calculator();
-  //   expect(calculator.addOne(2), 3);
-  //   expect(calculator.addOne(-7), -6);
-  //   expect(calculator.addOne(0), 1);
-  // });
+  test('withThrottle', () async {
+    var flag = 0;
+    final addFlag = withThrottle(
+      () => flag++,
+      const Duration(milliseconds: 50),
+    );
+    addFlag(); // 1
+    expect(flag, 1);
+    addFlag(); // 1
+    addFlag(); // 1
+    addFlag(); // 1
+    addFlag(); // 1
+    addFlag(); // 1
+    expect(flag, 1);
+    await sleep(50);
+    addFlag(); // 2
+    expect(flag, 2);
+    await sleep(50);
+    addFlag(); // 3
+    expect(flag, 3);
+    await sleep(40);
+    addFlag(); // 3
+    expect(flag, 3);
+  });
 }

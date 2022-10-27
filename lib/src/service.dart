@@ -6,18 +6,18 @@ class UpdateInfo {
   String? description;
 }
 
-abstract class UpdateModalWithCheckerService extends UpdateModalService {
+abstract class UpdateModalService extends UpdateModalContentService {
   Future<UpdateInfo?> checkUpdate();
 }
 
-abstract class UpdateModalService {
+abstract class UpdateModalContentService {
   Future<Stream<int>> startDownload();
   Future<int> cancelDownload();
   Future<int> dismiss();
   Future<int> install();
 }
 
-class SimpleUpdateModalService implements UpdateModalWithCheckerService {
+class SimpleUpdateModalService implements UpdateModalService {
   Future<UpdateInfo?> Function()? checkUpdateImpl;
   Future<Stream<int>> Function()? startDownloadImpl;
   Future<int> Function()? cancelDownloadImpl;

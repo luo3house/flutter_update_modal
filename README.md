@@ -1,39 +1,97 @@
-<!--
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+# update_modal
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/guides/libraries/writing-package-pages).
+Bugly style update modal on flutter. It is based on UI and cross platform.
 
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-library-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/developing-packages).
--->
+![Modal Preview](./image/modal.png)
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+## Getting Started
 
-## Features
+Example project is at `example/`.
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
-
-## Getting started
-
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
-
-## Usage
-
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
+### Implement your upgrade checker and downloader
 
 ```dart
-const like = 'sample';
+class UpdateModalServiceImpl implements UpdateModalService {
+  @override
+  Future<int> cancelDownload() {
+    // Perform cancel download, resolve arbitary number
+  }
+
+  @override
+  Future<UpdateInfo> checkUpdate() async {
+    // Perform check update, resolve update info or NULL
+    return UpdateInfo()
+      ..name = "ExampleUpdaterApp"
+      ..version = "3.2.0"
+      ..size = "13.6M"
+      ..releasedAt = "2022-10-26 22:20:01"
+      ..description = "Upgrade description";
+  }
+
+  @override
+  Future<int> dismiss() {
+    // Perform dismiss to cleanup
+    return Future.value(0);
+  }
+
+  @override
+  Future<int> install() {
+    // Perform install package
+    return Future.value(0);
+  }
+
+  @override
+  Future<Stream<int>> startDownload() {
+    // Perform download, resolve a stream for progress notification
+    // When progress > 100(e.g. 101), the modal mark state to readyToInstall
+    return Future.value(Stream.fromFutures([
+      Future.delayed(Duration(milliseconds: 150 * 1), () => 20),
+      Future.delayed(Duration(milliseconds: 150 * 2), () => 40),
+      Future.delayed(Duration(milliseconds: 150 * 3), () => 60),
+      Future.delayed(Duration(milliseconds: 150 * 4), () => 80),
+      Future.delayed(Duration(milliseconds: 150 * 5), () => 100),
+      // modal show [Dismiss, Install] once receive progress > 100
+      Future.delayed(Duration(milliseconds: 150 * 6), () => 120),
+    ]));
+  }
+}
 ```
 
-## Additional information
+### Perform check at App startup
 
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
+```dart
+class MyApp extends StatefulWidget {
+  @override
+  createState() => _MyApp();
+}
+
+class _MyApp extends State<MyApp> {
+  @override
+  initState() {
+    UpdateModal.init(
+      context,
+      service: UpdateModalServiceImpl(),
+    );
+  }
+
+  // build page
+}
+```
+
+## Debugging
+
+Open a web server for cross-platform modal widget debugging.
+
+```bash
+Make example
+```
+
+or,
+
+```bash
+cd example; flutter run -d web-server --web-port=8080
+```
+
+## License
+
+MIT

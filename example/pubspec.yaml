@@ -1,5 +1,5 @@
 name: example
-description: Example for updater_modal
+description: Example project for update_modal
 
 publish_to: 'none'
 
@@ -12,6 +12,8 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.2
+  update_modal: 
+    path: ../
 
 dev_dependencies:
   flutter_test:

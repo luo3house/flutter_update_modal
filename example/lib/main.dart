@@ -1,16 +1,20 @@
-import 'package:example/modal.dart';
-import 'package:example/service.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:update_modal/update_modal.dart';
 
 void main() {
-  runApp(MaterialApp(
+  // runApp(MaterialApp(
+  //   title: 'Flutter Demo',
+  //   theme: ThemeData(primarySwatch: Colors.blue),
+  //   home: const MyApp(material: true),
+  // ));
+  runApp(const CupertinoApp(
     title: 'Flutter Demo',
-    theme: ThemeData(primarySwatch: Colors.blue),
-    home: MyApp(),
+    home: MyApp(material: false),
   ));
 }
 
-class UpdateModalServiceImpl implements UpdateModalWithCheckerService {
+class UpdateModalServiceImpl implements UpdateModalService {
   @override
   Future<int> cancelDownload() {
     return Future.value(0);
@@ -18,13 +22,12 @@ class UpdateModalServiceImpl implements UpdateModalWithCheckerService {
 
   @override
   Future<UpdateInfo> checkUpdate() {
-    return Future.value(
-      UpdateInfo()
-        ..name = "ExampleUpdaterApp"
-        ..version = "3.2.0"
-        ..size = "13.6M"
-        ..releasedAt = "2022-10-26 22:20:01"
-        ..description = """
+    final info = UpdateInfo()
+      ..name = "ExampleUpdaterApp"
+      ..version = "3.2.0"
+      ..size = "13.6M"
+      ..releasedAt = "2022-10-26 22:20:01"
+      ..description = """
 ExampleUpdaterAppExampleUpdaterAppExampleUpdaterAppExampleUpdaterAppExampleUpdaterApp
 ExampleUpdaterApp
 ExampleUpdaterApp
@@ -32,8 +35,8 @@ ExampleUpdaterApp
 ExampleUpdaterApp
 ExampleUpdaterApp
 ExampleUpdaterApp
-""",
-    );
+""";
+    return Future.delayed(Duration(seconds: 1), () => info);
   }
 
   @override
@@ -49,39 +52,56 @@ ExampleUpdaterApp
   @override
   Future<Stream<int>> startDownload() {
     return Future.value(Stream.fromFutures([
-      Future.delayed(Duration(milliseconds: 50 * 1), () => 20),
-      Future.delayed(Duration(milliseconds: 50 * 2), () => 40),
-      Future.delayed(Duration(milliseconds: 50 * 3), () => 60),
-      Future.delayed(Duration(milliseconds: 50 * 4), () => 80),
-      Future.delayed(Duration(milliseconds: 50 * 5), () => 100),
-      Future.delayed(Duration(milliseconds: 50 * 6), () => 120),
+      Future.delayed(Duration(milliseconds: 150 * 1), () => 20),
+      Future.delayed(Duration(milliseconds: 150 * 2), () => 40),
+      Future.delayed(Duration(milliseconds: 150 * 3), () => 60),
+      Future.delayed(Duration(milliseconds: 150 * 4), () => 80),
+      Future.delayed(Duration(milliseconds: 150 * 5), () => 100),
+      Future.delayed(Duration(milliseconds: 150 * 6), () => 120),
     ]));
   }
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+  final bool material;
+  const MyApp({super.key, required this.material});
   @override
   createState() => _MyApp();
 }
 
 class _MyApp extends State<MyApp> {
-  @override
-  void initState() {
-    super.initState();
-    Future.delayed(Duration(milliseconds: 300), () {
-      UpdateModal.init(
-        context,
-        service: UpdateModalServiceImpl(),
-      );
-    });
+  Widget buildMaterial(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: ElevatedButton(
+          child: const Text("Check Update"),
+          onPressed: () {
+            UpdateModal.init(
+              context,
+              service: UpdateModalServiceImpl(),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget buildCupertino(BuildContext context) {
+    return CupertinoPageScaffold(
+      child: CupertinoButton(
+        child: const Text("Check Update"),
+        onPressed: () {
+          UpdateModal.init(
+            context,
+            service: UpdateModalServiceImpl(),
+          );
+        },
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF555555),
-      body: Text("Demo"),
-    );
+    return widget.material ? buildMaterial(context) : buildCupertino(context);
   }
 }

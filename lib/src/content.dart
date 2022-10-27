@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:math';
-
 import 'package:flutter/widgets.dart';
 
+import 'strings.dart';
+import 'utils.dart';
 import 'service.dart';
 
 enum ModalState {
@@ -11,21 +12,20 @@ enum ModalState {
   readyToInstall,
 }
 
-class UpdaterModalContentStyle {
-  static UpdaterModalContentStyle defaultStyle() {
-    return UpdaterModalContentStyle()
-      ..bgColor = const Color(0xFFFFFFFF)
-      ..titleSize = 18.0
-      ..titleColor = const Color(0xFF000000)
-      ..infoSize = 14.0
-      ..infoColor = const Color(0xFF8D8D8D)
-      ..descriptionSize = 14.0
-      ..descriptionColor = const Color(0xFF000000)
-      ..buttonTextSize = 16.0
-      ..buttonBgColor = const Color(0xFFFFFFFF)
-      ..buttonTextColor = const Color(0xFF000000)
-      ..borderColor = const Color(0xFFDEDEDE);
-  }
+class UpdateModalContentStyle {
+  static final defaultStyle = UpdateModalContentStyle()
+    ..bgColor = const Color(0xFFFFFFFF)
+    ..titleSize = 18.0
+    ..titleColor = const Color(0xFF000000)
+    ..infoSize = 14.0
+    ..infoColor = const Color(0xFF8D8D8D)
+    ..descriptionSize = 14.0
+    ..descriptionColor = const Color(0xFF000000)
+    ..buttonTextSize = 16.0
+    ..buttonBgColor = const Color(0xFFFFFFFF)
+    ..buttonTextColor = const Color(0xFF000000)
+    ..maskColor = const Color(0x98000000)
+    ..borderColor = const Color(0xFFDEDEDE);
 
   Color? bgColor;
   double? titleSize;
@@ -37,18 +37,20 @@ class UpdaterModalContentStyle {
   double? buttonTextSize;
   Color? buttonBgColor;
   Color? buttonTextColor;
+  Color? maskColor;
   Color? borderColor;
 }
 
-class UpdaterModalContent extends StatefulWidget {
+class UpdateModalContent extends StatefulWidget {
   final double width;
   final double height;
-  final UpdateModalService service;
+  final UpdateModalContentService service;
   final UpdateInfo info;
   final bool autoInstall;
-  final UpdaterModalContentStyle? style;
   final ModalState? initialState;
-  const UpdaterModalContent({
+  final UpdateModalContentStyle? style;
+  final UpdateModalStrings? strings;
+  const UpdateModalContent({
     super.key,
     required this.service,
     required this.info,
@@ -57,20 +59,22 @@ class UpdaterModalContent extends StatefulWidget {
     this.height = 280,
     this.initialState,
     this.style,
+    this.strings,
   });
   @override
-  createState() => UpdaterModalContentState();
+  createState() => UpdateModalContentState();
 }
 
-class UpdaterModalContentState extends State<UpdaterModalContent> {
+class UpdateModalContentState extends State<UpdateModalContent> {
   double get width => widget.width;
   double get height => widget.height;
-  UpdateModalService get service => widget.service;
+  UpdateModalContentService get service => widget.service;
   bool get autoInstall => widget.autoInstall;
   UpdateInfo get info => widget.info;
-  UpdaterModalContentStyle get style =>
-      widget.style ?? UpdaterModalContentStyle.defaultStyle();
-  final defaultStyle = UpdaterModalContentStyle.defaultStyle();
+  UpdateModalContentStyle? get style => widget.style;
+  UpdateModalStrings? get strings => widget.strings;
+  final defaultStyle = UpdateModalContentStyle.defaultStyle;
+  final defaultStrings = UpdateModalStrings.zhCN;
 
   var percent = 0;
   var state = ModalState.prompt;
@@ -129,7 +133,12 @@ class UpdaterModalContentState extends State<UpdaterModalContent> {
     service.install();
   }
 
-  void onDismiss() {
+  void onDismiss() async {
+    if (state == ModalState.downloading) {
+      service.cancelDownload();
+      _sub?.cancel();
+      _sub = null;
+    }
     service.dismiss();
   }
 
@@ -140,8 +149,8 @@ class UpdaterModalContentState extends State<UpdaterModalContent> {
     bool bold = false,
   }) {
     final buttonTextStyle = TextStyle(
-      color: style.buttonTextColor ?? defaultStyle.titleColor!,
-      fontSize: style.buttonTextSize ?? defaultStyle.buttonTextSize!,
+      color: style?.buttonTextColor ?? defaultStyle.titleColor!,
+      fontSize: style?.buttonTextSize ?? defaultStyle.buttonTextSize!,
       fontWeight: bold ? FontWeight.w700 : FontWeight.normal,
     );
     return GestureDetector(
@@ -151,9 +160,9 @@ class UpdaterModalContentState extends State<UpdaterModalContent> {
         margin: const EdgeInsets.all(10),
         padding: const EdgeInsets.all(5),
         decoration: BoxDecoration(
-          color: style.buttonBgColor ?? defaultStyle.buttonBgColor!,
+          color: style?.buttonBgColor ?? defaultStyle.buttonBgColor!,
           border: Border.all(
-            color: style.borderColor ?? defaultStyle.borderColor!,
+            color: style?.borderColor ?? defaultStyle.borderColor!,
           ),
         ),
         child: Text(
@@ -167,39 +176,51 @@ class UpdaterModalContentState extends State<UpdaterModalContent> {
 
   List<Widget> promptActions() {
     return [
-      button(text: "以后再说", onTap: onDismiss),
-      button(text: "立即更新", bold: true, onTap: onDownload),
+      button(
+          text: "${strings?.dismiss ?? defaultStrings.dismiss}",
+          onTap: withThrottle(onDismiss)),
+      button(
+          text: "${strings?.upgrade ?? defaultStrings.upgrade}",
+          bold: true,
+          onTap: withThrottle(onDownload)),
     ];
   }
 
   List<Widget> downloadingActions() {
     return [
-      button(text: "取消", onTap: onAbortDownload),
+      button(
+          text: "${strings?.dismiss ?? defaultStrings.dismiss}",
+          onTap: withThrottle(onDismiss)),
       button(text: "$percent %", bold: true, onTap: () => 0),
     ];
   }
 
   List<Widget> readyToInstallActions() {
     return [
-      button(text: "以后再说", onTap: onDismiss),
-      button(text: "安装", bold: true, onTap: onDownload),
+      button(
+          text: "${strings?.dismiss ?? defaultStrings.dismiss}",
+          onTap: withThrottle(onDismiss)),
+      button(
+          text: "${strings?.install ?? defaultStrings.install}",
+          bold: true,
+          onTap: withThrottle(onDownload)),
     ];
   }
 
   @override
   Widget build(BuildContext context) {
     final titleStyle = TextStyle(
-      color: style.titleColor ?? defaultStyle.titleColor!,
-      fontSize: style.titleSize ?? defaultStyle.titleSize!,
+      color: style?.titleColor ?? defaultStyle.titleColor!,
+      fontSize: style?.titleSize ?? defaultStyle.titleSize!,
       fontWeight: FontWeight.w700,
     );
     final infoStyle = TextStyle(
-      color: style.infoColor ?? defaultStyle.infoColor!,
-      fontSize: style.infoSize ?? defaultStyle.infoSize!,
+      color: style?.infoColor ?? defaultStyle.infoColor!,
+      fontSize: style?.infoSize ?? defaultStyle.infoSize!,
     );
     final descriptionStyle = TextStyle(
-      color: style.descriptionColor ?? defaultStyle.descriptionColor!,
-      fontSize: style.descriptionSize ?? defaultStyle.descriptionSize!,
+      color: style?.descriptionColor ?? defaultStyle.descriptionColor!,
+      fontSize: style?.descriptionSize ?? defaultStyle.descriptionSize!,
     );
     final title = Container(
       width: width,
@@ -208,7 +229,7 @@ class UpdaterModalContentState extends State<UpdaterModalContent> {
         border: Border(
           bottom: BorderSide(
             width: 1,
-            color: style.borderColor ?? defaultStyle.borderColor!,
+            color: style?.borderColor ?? defaultStyle.borderColor!,
           ),
         ),
       ),
@@ -223,22 +244,23 @@ class UpdaterModalContentState extends State<UpdaterModalContent> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "版本: ${info.version ?? "-"}",
+          "${strings?.version ?? defaultStrings.version}: ${info.version ?? "-"}",
           style: infoStyle,
           maxLines: 1,
         ),
         Text(
-          "包大小: ${info.size ?? "-"}",
+          "${strings?.size ?? defaultStrings.size}: ${info.size ?? "-"}",
           style: infoStyle,
           maxLines: 1,
         ),
         Text(
-          "发布时间: ${info.releasedAt ?? "-"}",
+          "${strings?.releasedAt ?? defaultStrings.releasedAt}: ${info.releasedAt ?? "-"}",
           style: infoStyle,
           maxLines: 1,
         ),
         const SizedBox(height: 5),
-        Text("更新说明: ", style: descriptionStyle),
+        Text("${strings?.description ?? defaultStrings.description}: ",
+            style: descriptionStyle),
         const SizedBox(height: 5),
         Expanded(
           child: ListView(
@@ -267,7 +289,7 @@ class UpdaterModalContentState extends State<UpdaterModalContent> {
     return Container(
       width: width,
       height: height,
-      color: style.bgColor ?? defaultStyle.bgColor!,
+      color: style?.bgColor ?? defaultStyle.bgColor!,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         title,
         Expanded(
