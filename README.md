@@ -2,6 +2,8 @@
 
 Bugly style update modal on flutter. It is based on UI and cross platform.
 
+**Try the [Demo](https://luo3house.github.io/flutter_update_modal/)**
+
 ![Modal Preview](./image/modal.png)
 
 ## Getting Started
