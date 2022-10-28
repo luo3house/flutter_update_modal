@@ -8,7 +8,6 @@ permissions:
   contents: read
   pages: write
   id-token: write
-  deployments: write
 
 jobs:
   build:
@@ -23,7 +22,7 @@ jobs:
         run: flutter pub get
       - name: Build web
         run: cd example && flutter build web
-      - name: Upload Build Artifact
+      - name: Upload Build artifact
         uses: actions/upload-artifact@v3
         with:
           name: dist
@@ -38,8 +37,17 @@ jobs:
     steps:
       - name: Setup Pages
         uses: actions/configure-pages@v2
+      - name: Download Build artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: dist
+          path: '.'
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: '.'
       - name: Deploy GitHub Pages site
         id: deployment
-        uses: actions/deploy-pages@v1.2.2
+        uses: actions/deploy-pages@v1
         with:
           artifact_name: dist
