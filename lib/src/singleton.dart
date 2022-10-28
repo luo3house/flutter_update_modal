@@ -10,13 +10,18 @@ class UpdateModal {
     required UpdateModalService service,
     UpdateModalContentStyle? style,
     UpdateModalStrings? strings,
+    bool dismissable = true,
+    bool autoInstall = false,
   }) {
     dynamic Function() onDismiss = () {};
     final wrappedService = SimpleUpdateModalService()
       ..checkUpdateImpl = service.checkUpdate
       ..startDownloadImpl = service.startDownload
       ..cancelDownloadImpl = service.cancelDownload
-      ..installImpl = service.install
+      ..installImpl = (() => service.install().then((value) {
+            onDismiss();
+            return value;
+          }))
       ..dismissImpl = () => service.dismiss().then((value) {
             onDismiss();
             return value;
@@ -29,6 +34,8 @@ class UpdateModal {
         info: info,
         style: style,
         strings: strings,
+        autoInstall: autoInstall,
+        dismissable: dismissable,
       );
       showGeneralDialog(
         context: context,

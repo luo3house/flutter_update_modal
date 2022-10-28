@@ -1,16 +1,10 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:update_modal/update_modal.dart';
 
 void main() {
-  // runApp(MaterialApp(
-  //   title: 'Flutter Demo',
-  //   theme: ThemeData(primarySwatch: Colors.blue),
-  //   home: const MyApp(material: true),
-  // ));
   runApp(const CupertinoApp(
     title: 'Flutter Demo',
-    home: MyApp(material: false),
+    home: const MyApp(),
   ));
 }
 
@@ -36,7 +30,7 @@ ExampleUpdaterApp
 ExampleUpdaterApp
 ExampleUpdaterApp
 """;
-    return Future.delayed(Duration(seconds: 1), () => info);
+    return Future.delayed(Duration(milliseconds: 300), () => info);
   }
 
   @override
@@ -63,45 +57,59 @@ ExampleUpdaterApp
 }
 
 class MyApp extends StatefulWidget {
-  final bool material;
-  const MyApp({super.key, required this.material});
+  const MyApp({super.key});
   @override
   createState() => _MyApp();
 }
 
 class _MyApp extends State<MyApp> {
-  Widget buildMaterial(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: ElevatedButton(
-          child: const Text("Check Update"),
-          onPressed: () {
-            UpdateModal.init(
-              context,
-              service: UpdateModalServiceImpl(),
-            );
-          },
-        ),
-      ),
-    );
-  }
-
   Widget buildCupertino(BuildContext context) {
     return CupertinoPageScaffold(
-      child: CupertinoButton(
-        child: const Text("Check Update"),
-        onPressed: () {
-          UpdateModal.init(
-            context,
-            service: UpdateModalServiceImpl(),
-          );
-        },
+      child: Center(
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          CupertinoButton(
+            child: const Text("Check Update"),
+            onPressed: () {
+              UpdateModal.init(
+                context,
+                service: UpdateModalServiceImpl(),
+              );
+            },
+          ),
+          CupertinoButton(
+            child: const Text("Check Update (NOT dismissable)"),
+            onPressed: () {
+              UpdateModal.init(
+                context,
+                service: UpdateModalServiceImpl(),
+                dismissable: false,
+              );
+            },
+          ),
+          CupertinoButton(
+            child: const Text("Check Update (i18N)"),
+            onPressed: () {
+              UpdateModal.init(
+                context,
+                service: UpdateModalServiceImpl(),
+                strings: UpdateModalStrings()
+                  ..dismiss = "Later"
+                  ..upgrade = "Upgrade Now"
+                  ..install = "Install Now"
+                  ..version = "Version"
+                  ..size = "App Size"
+                  ..releasedAt = "Release Date"
+                  ..description = "Description",
+              );
+            },
+          ),
+        ]),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return widget.material ? buildMaterial(context) : buildCupertino(context);
+    return buildCupertino(context);
   }
 }

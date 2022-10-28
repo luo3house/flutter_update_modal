@@ -50,6 +50,7 @@ class UpdateModalContent extends StatefulWidget {
   final ModalState? initialState;
   final UpdateModalContentStyle? style;
   final UpdateModalStrings? strings;
+  final bool dismissable;
   const UpdateModalContent({
     super.key,
     required this.service,
@@ -60,6 +61,7 @@ class UpdateModalContent extends StatefulWidget {
     this.initialState,
     this.style,
     this.strings,
+    this.dismissable = true,
   });
   @override
   createState() => UpdateModalContentState();
@@ -183,7 +185,7 @@ class UpdateModalContentState extends State<UpdateModalContent> {
           text: "${strings?.upgrade ?? defaultStrings.upgrade}",
           bold: true,
           onTap: withThrottle(onDownload)),
-    ];
+    ].skip(widget.dismissable ? 0 : 1).toList(growable: false);
   }
 
   List<Widget> downloadingActions() {
@@ -192,7 +194,7 @@ class UpdateModalContentState extends State<UpdateModalContent> {
           text: "${strings?.dismiss ?? defaultStrings.dismiss}",
           onTap: withThrottle(onDismiss)),
       button(text: "$percent %", bold: true, onTap: () => 0),
-    ];
+    ].skip(widget.dismissable ? 0 : 1).toList(growable: false);
   }
 
   List<Widget> readyToInstallActions() {
@@ -203,8 +205,8 @@ class UpdateModalContentState extends State<UpdateModalContent> {
       button(
           text: "${strings?.install ?? defaultStrings.install}",
           bold: true,
-          onTap: withThrottle(onDownload)),
-    ];
+          onTap: withThrottle(onInstall)),
+    ].skip(widget.dismissable ? 0 : 1).toList(growable: false);
   }
 
   @override
@@ -258,10 +260,10 @@ class UpdateModalContentState extends State<UpdateModalContent> {
           style: infoStyle,
           maxLines: 1,
         ),
-        const SizedBox(height: 5),
+        const SizedBox(height: 8),
         Text("${strings?.description ?? defaultStrings.description}: ",
             style: descriptionStyle),
-        const SizedBox(height: 5),
+        const SizedBox(height: 8),
         Expanded(
           child: ListView(
             children: [
