@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
       - name: Build web
-        run: cd example && flutter build web
+        run: cd example && flutter build web --base-href=/flutter_update_modal/
       - name: Upload Build artifact
         uses: actions/upload-artifact@v3
         with:
