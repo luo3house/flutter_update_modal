@@ -1,0 +1,35 @@
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.3.0'
+          channel: 'stable'
+      - name: Enter Directory
+        run: cd example/
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Build web
+        run: flutter build web
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: build/web
+  
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy GitHub Pages site
+        uses: actions/deploy-pages@v1.2.2
+        with:
+          token: ${{ github.token }}
+          artifact_name: dist
