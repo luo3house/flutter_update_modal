@@ -12,17 +12,15 @@ jobs:
         with:
           flutter-version: '3.3.0'
           channel: 'stable'
-      - name: Enter Directory
-        run: cd example/
       - name: Install dependencies
         run: flutter pub get
       - name: Build web
-        run: flutter build web
+        run: cd example && flutter build web
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v3
         with:
           name: dist
-          path: build/web
+          path: example/build/web
   
   deploy:
     needs: build
