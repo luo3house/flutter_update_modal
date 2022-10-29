@@ -1,14 +1,17 @@
 # update_modal
 
+[![Pub Version](https://img.shields.io/pub/v/update_modal)](https://pub.dev/packages/update_modal)
+[![Github Action](https://github.com/luo3house/flutter_update_modal/actions/workflows/build-demo.yml/badge.svg)](https://luo3house.github.io/flutter_update_modal/)
+
 Bugly style update modal on flutter. It is based on UI and cross platform.
 
 **Try the [Demo](https://luo3house.github.io/flutter_update_modal/)**
 
+Example project is at `example/`.
+
 ![Modal Preview](./image/modal.png)
 
 ## Getting Started
-
-Example project is at `example/`.
 
 ### Install
 
@@ -16,13 +19,13 @@ Add dependency to `pubspec.yaml`.
 
 ```yaml
 dependencies:
-  update_modal: ^0.0.1
+  update_modal: ^0.0.3
 ```
 
-### Implement your upgrade checker and downloader
+### Implement checker, downloader, installer
 
 ```dart
-class UpdateModalServiceImpl implements UpdateModalService {
+class MyUpdateService implements UpdateModalService {
   @override
   Future<int> cancelDownload() {
     // Perform cancel download, resolve arbitary number
@@ -30,7 +33,8 @@ class UpdateModalServiceImpl implements UpdateModalService {
 
   @override
   Future<UpdateInfo> checkUpdate() async {
-    // Perform check update, resolve update info or NULL
+    // Perform check update, resolve update info
+    // Resolve NULL means no update
     return UpdateInfo()
       ..name = "ExampleUpdaterApp"
       ..version = "3.2.0"
@@ -84,8 +88,6 @@ class _MyApp extends State<MyApp> {
       service: UpdateModalServiceImpl(),
     );
   }
-
-  // build page
 }
 ```
 

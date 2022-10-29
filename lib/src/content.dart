@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:ui';
 import 'package:flutter/widgets.dart';
 
+import 'style.dart';
 import 'strings.dart';
 import 'utils.dart';
 import 'service.dart';
@@ -10,35 +12,6 @@ enum ModalState {
   prompt,
   downloading,
   readyToInstall,
-}
-
-class UpdateModalContentStyle {
-  static final defaultStyle = UpdateModalContentStyle()
-    ..bgColor = const Color(0xFFFFFFFF)
-    ..titleSize = 18.0
-    ..titleColor = const Color(0xFF000000)
-    ..infoSize = 14.0
-    ..infoColor = const Color(0xFF8D8D8D)
-    ..descriptionSize = 14.0
-    ..descriptionColor = const Color(0xFF000000)
-    ..buttonTextSize = 16.0
-    ..buttonBgColor = const Color(0xFFFFFFFF)
-    ..buttonTextColor = const Color(0xFF000000)
-    ..maskColor = const Color(0x98000000)
-    ..borderColor = const Color(0xFFDEDEDE);
-
-  Color? bgColor;
-  double? titleSize;
-  Color? titleColor;
-  double? infoSize;
-  Color? infoColor;
-  double? descriptionSize;
-  Color? descriptionColor;
-  double? buttonTextSize;
-  Color? buttonBgColor;
-  Color? buttonTextColor;
-  Color? maskColor;
-  Color? borderColor;
 }
 
 class UpdateModalContent extends StatefulWidget {
@@ -56,7 +29,7 @@ class UpdateModalContent extends StatefulWidget {
     required this.service,
     required this.info,
     this.autoInstall = true,
-    this.width = 300,
+    this.width = 260,
     this.height = 280,
     this.initialState,
     this.style,
@@ -75,7 +48,7 @@ class UpdateModalContentState extends State<UpdateModalContent> {
   UpdateInfo get info => widget.info;
   UpdateModalContentStyle? get style => widget.style;
   UpdateModalStrings? get strings => widget.strings;
-  final defaultStyle = UpdateModalContentStyle.defaultStyle;
+  var defaultStyle = UpdateModalContentStyle.defaultStyle;
   final defaultStrings = UpdateModalStrings.zhCN;
 
   var percent = 0;
@@ -211,6 +184,9 @@ class UpdateModalContentState extends State<UpdateModalContent> {
 
   @override
   Widget build(BuildContext context) {
+    defaultStyle = MediaQuery.of(context).platformBrightness == Brightness.dark
+        ? UpdateModalContentStyle.dark
+        : UpdateModalContentStyle.light;
     final titleStyle = TextStyle(
       color: style?.titleColor ?? defaultStyle.titleColor!,
       fontSize: style?.titleSize ?? defaultStyle.titleSize!,
